@@ -100,3 +100,34 @@ Sorted set'ler `dict(member -> score)` yapısıyla tutuluyor; `ZRANGE` her çağ
 `Store`, `threading.Lock` kullanır. `INCR` gibi "oku -> hesapla -> yaz" şeklindeki
 çok adımlı işlemler bu kilit altında çalışır, böylece aynı key'e aynı anda gelen
 çoklu istekler birbirinin güncellemesini kaybetmez
+
+## Docker
+
+```powershell
+docker build -t redis-lite .
+docker run -p 8080:8080 redis-lite
+```
+
+Container ayağa kalktıktan sonra:
+
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8080/health"
+```
+
+## Cloud Run'a Deploy
+
+```powershell
+gcloud auth configure-docker europe-west1-docker.pkg.dev
+gcloud artifacts repositories create redis-lite-repo --repository-format=docker --location=europe-west1
+
+docker tag redis-lite europe-west1-docker.pkg.dev/redis-lite-v1/redis-lite-repo/redis-lite
+docker push europe-west1-docker.pkg.dev/redis-lite-v1/redis-lite-repo/redis-lite
+
+gcloud run deploy redis-lite --image europe-west1-docker.pkg.dev/redis-lite-v1/redis-lite-repo/redis-lite --region europe-west1 --allow-unauthenticated --max-instances 1
+```
+
+**Canlı servis:** https://redis-lite-407994105605.europe-west1.run.app
+
+```powershell
+Invoke-RestMethod -Uri "https://redis-lite-407994105605.europe-west1.run.app/health"
+```
