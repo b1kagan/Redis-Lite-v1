@@ -46,3 +46,54 @@ def test_command_name_is_case_insensitive():
     response = client.post("/command", json={"command": "set", "args": ["user:2", "Fatma"]})
     assert response.status_code == 200
     assert response.json()["result"] == "OK"
+
+def test_del_command_via_api():
+    client.post("/command", json={"command": "SET", "args": ["k1", "v1"]})
+    response = client.post("/command", json={"command": "DEL", "args": ["k1"]})
+    assert response.json()["result"] == 1
+
+
+def test_incr_command_via_api():
+    response = client.post("/command", json={"command": "INCR", "args": ["counter"]})
+    assert response.json()["result"] == 1
+
+
+def test_hget_command_via_api():
+    client.post("/command", json={"command": "HSET", "args": ["u1", "name", "Ayse"]})
+    response = client.post("/command", json={"command": "HGET", "args": ["u1", "name"]})
+    assert response.json()["result"] == "Ayse"
+
+
+def test_hdel_command_via_api():
+    client.post("/command", json={"command": "HSET", "args": ["u2", "name", "Ayse"]})
+    response = client.post("/command", json={"command": "HDEL", "args": ["u2", "name"]})
+    assert response.json()["result"] == 1
+
+
+def test_hgetall_command_via_api():
+    client.post("/command", json={"command": "HSET", "args": ["u3", "name", "Ayse"]})
+    response = client.post("/command", json={"command": "HGETALL", "args": ["u3"]})
+    assert response.json()["result"] == {"name": "Ayse"}
+
+
+def test_zadd_command_via_api():
+    response = client.post("/command", json={"command": "ZADD", "args": ["lb", "150", "p1"]})
+    assert response.json()["result"] == 1
+
+
+def test_zrange_command_via_api():
+    client.post("/command", json={"command": "ZADD", "args": ["lb2", "150", "p1"]})
+    response = client.post("/command", json={"command": "ZRANGE", "args": ["lb2", "0", "-1"]})
+    assert response.json()["result"] == ["p1"]
+
+
+def test_zrem_command_via_api():
+    client.post("/command", json={"command": "ZADD", "args": ["lb3", "150", "p1"]})
+    response = client.post("/command", json={"command": "ZREM", "args": ["lb3", "p1"]})
+    assert response.json()["result"] == 1
+
+
+def test_zscore_command_via_api():
+    client.post("/command", json={"command": "ZADD", "args": ["lb4", "150", "p1"]})
+    response = client.post("/command", json={"command": "ZSCORE", "args": ["lb4", "p1"]})
+    assert response.json()["result"] == 150
